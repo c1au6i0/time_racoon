@@ -15,7 +15,7 @@ library(scales)
 
 
 
-source("helper.r")
+source("helper.R")
 
 ui <- dashboardPage(
     dashboardHeader(title = "time Racoon"),
@@ -64,11 +64,10 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     
-    source("plots_racoon.r")
+    source("plots_racoon.R")
   
     # reactive values -------------
     dat_rc <- reactiveVal(NULL) # imported data
-    dat_fr <- reactiveVal(NULL) # filtered data
     
     # get data ----
     observeEvent(
@@ -76,28 +75,14 @@ server <- function(input, output) {
             input$data_in
         },
         handlerExpr = {
-            dat_long <- clean_data(dat = readxl::read_excel(input$data_in$datapath)) %>% 
-              filter(date_ins >= input$date_r[1],  date_ins <= input$date_r[2])
+            dat_long <- clean_data(dat = readxl::read_excel(input$data_in$datapath))
             dat_rc(dat_long)
         }
     )
     
-    # filter data -----
-    observeEvent(
-        eventExpr = {
-            input$date_r
-        },
-        handlerExpr = {
-            if(!is.null(dat_rc())) {
-            dat_long <- dat_rc() %>% 
-                filter(date_ins >= input$date_r[1],  date_ins <= input$date_r[2])
-            dat_rc(dat_long)
-            }
-        }
-    )
-    
+    # plot sleep ----
     output$summary <- renderPlot({
-      sleeptime_plot(dat = req(dat_rc()), dwm = input$dwm)
+      sleeptime_plot(dat = req(dat_rc()), dwm = input$dwm, date_r = input$date_r)
     })
     
 

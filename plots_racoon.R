@@ -1,7 +1,12 @@
 # Plots
 
 # sleeptime
-sleeptime_plot <- function(dat = dat, dwm =  input$dwm) {
+sleeptime_plot <- function(dat = dat, dwm =  input$dwm, date_r = input$date_r) {
+      
+      dat <-  
+        dat %>% 
+      filter(date_ins >= date_r[1],  date_ins <= date_r[2])
+      
       sleeptime_plot <- dat %>% 
         mutate(sleep = sleep/60) %>% 
         ggplot() +
