@@ -1,12 +1,5 @@
-library(readxl)
-library(tidyr)
-library(data.table)
-library(tidyverse)
-library(lubridate)
-library(janitor)
-
-
-dat <- readxl::read_excel("personal_tt.xlsx")
+# Import
+# dat_long <- readxl::read_excel("personal_tt.xlsx")
 clean_data <- function(dat) {
   dat_long <-
     dat %>%
