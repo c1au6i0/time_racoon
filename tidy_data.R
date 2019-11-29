@@ -32,6 +32,7 @@ clean_data <- function(dat) {
       as.numeric) %>%
     clean_names() %>%
     mutate(
+      sleep_quality = factor(sleep_quality, levels = 0:5),
       month_year_ins = floor_date(date_ins, "month"),
       week_year_ins = floor_date(date_ins, "week", week_start = 1),
       day_ins = lubridate::wday(date_ins, label = TRUE, week_start = 1)

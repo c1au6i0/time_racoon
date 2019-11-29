@@ -15,7 +15,7 @@ library(scales)
 
 
 
-source("helper.R")
+source("tidy_data.R")
 
 ui <- dashboardPage(
     dashboardHeader(title = "time Racoon"),
@@ -75,8 +75,9 @@ server <- function(input, output) {
             input$data_in
         },
         handlerExpr = {
-            dat_long <- clean_data(dat = readxl::read_excel(input$data_in$datapath))
+            dat_long <- suppressWarnings(clean_data(dat = readxl::read_excel(input$data_in$datapath)))
             dat_rc(dat_long)
+            browser()
         }
     )
     
