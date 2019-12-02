@@ -15,7 +15,7 @@ library(scales)
 
 
 
-source("tidy_data.R")
+source("o_functions/tidy_data.R")
 
 ui <- dashboardPage(
     dashboardHeader(title = "time Racoon"),
@@ -48,10 +48,11 @@ ui <- dashboardPage(
                             # The id lets us use input$tabset1 on the server to find the current tab
                             id = "tabset1",
                             tabPanel("Sleep", 
-                                      plotOutput("summary")
+                                      plotOutput("sleep")
                                      
                                      ),
-                            tabPanel("Work", "Tab content 2")
+                            tabPanel("Get-up and Bed Time", 
+                                     plotOutput("getup"))
                     
             ))),
             tabItem("tables",
@@ -64,10 +65,11 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     
-    source("plots_racoon.R")
+    source("o_functions/plots_racoon.R")
   
     # reactive values -------------
     dat_rc <- reactiveVal(NULL) # imported data
+    dat_fr <- reactiveVal(NULL)
     
     # get data ----
     observeEvent(
@@ -77,13 +79,23 @@ server <- function(input, output) {
         handlerExpr = {
             dat_long <- suppressWarnings(clean_data(dat = readxl::read_excel(input$data_in$datapath)))
             dat_rc(dat_long)
-            browser()
         }
     )
     
+dat_fr <- reactive({
+          
+          filter(req(dat_rc()), date_ins >= input$date_r[1],  date_ins <= input$date_r[2])
+      }
+    )
+    
     # plot sleep ----
-    output$summary <- renderPlot({
-      sleeptime_plot(dat = req(dat_rc()), dwm = input$dwm, date_r = input$date_r)
+    output$sleep<- renderPlot({
+      sleeptime_plot(dat = req(dat_fr()), dwm = input$dwm)
+    })
+
+    # plot sleep ----
+    output$getup<- renderPlot({
+      getup_plot(dat = req(dat_fr()), dwm = input$dwm)
     })
     
 
