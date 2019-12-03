@@ -1,6 +1,7 @@
 # Thank you Cheng
 # https://github.com/rstudio/shiny-examples/tree/master/087-crandash
 
+# libraries ------------
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
@@ -12,11 +13,11 @@ library(tidyverse)
 library(lubridate)
 library(janitor)
 library(scales)
-
-
+# library(ggiraph) # next implementation
 
 source("o_functions/tidy_data.R")
 
+# UI --------------------
 ui <- dashboardPage(
     dashboardHeader(title = "time Racoon"),
     dashboardSidebar(
@@ -34,35 +35,59 @@ ui <- dashboardPage(
         ),
         
         sidebarMenu(
-            menuItem("plots", tabName = "plots", icon = icon("chart-bar")),
+            menuItem("plots", tabName = "plots", icon = icon("chart-bar"), startExpanded = FALSE,
+                     menuSubItem("Time Sleeping", tabName = "time_sleeping"),
+                     menuSubItem("Get-up and Bed Time", tabName = "get_up"),
+                     menuSubItem("Time in Workplace", tabName = "work_time"),
+                     menuSubItem("Time Commuting", tabName = "commuting_time"),
+                     menuSubItem("Time Working at Home", tabName = "home_time"),
+                     menuSubItem("Processing Time", tabName = "processing_time"),
+                     menuSubItem("Time doing Tai Chi", tabName = "tai_chi"),
+                     menuSubItem("Time Walking", tabName = "walking"),
+                     menuSubItem("Time Swimming", tabName = "swimming")
+                     ),
             menuItem("tables", tabName = "tables", icon = icon("table"))
         )
     ),
     dashboardBody(
         tabItems(
-            tabItem("plots",
-                    fluidRow(
-                    tabBox(
-                            title = "Plots",
-                            width = 12,
-                            # The id lets us use input$tabset1 on the server to find the current tab
-                            id = "tabset1",
-                            tabPanel("Sleep", 
-                                      plotOutput("sleep")
-                                     
-                                     ),
-                            tabPanel("Get-up and Bed Time", 
-                                     plotOutput("getup"))
-                    
-            ))),
+            # plots ------------
             tabItem("tables",
-                    HTML("<spam style=color:red;>I am working on this</spam>")
+                    HTML("<spam style=color:red;>I am working on this too</spam>")
+            ),
+            tabItem("time_sleeping", 
+                      plotOutput("sleep")
+                     ),
+            tabItem("get_up",
+                     plotOutput("getup")
+                     ),
+            tabItem("work_time",
+                     plotOutput("work_time")
+                     ),
+            tabItem("commuting_time",
+                     plotOutput("commuting_time")
+                     ),
+            tabItem("home_time",
+                     plotOutput("home_time")
+            ),
+            tabItem("processing_time",
+                     plotOutput("processing_time")
+            ),
+            tabItem("tai_chi",
+                     plotOutput("tai_chi")
+            ),
+            tabItem("walking",
+                     plotOutput("walking")
+            ),
+            tabItem("swimming",
+                     plotOutput("swimming")
             )
         )
     )
 )
 
-# Define server logic required to draw a histogram
+
+# SERVER ------------
 server <- function(input, output) {
     
     source("o_functions/plots_racoon.R")
@@ -83,7 +108,6 @@ server <- function(input, output) {
     )
     
 dat_fr <- reactive({
-          
           filter(req(dat_rc()), date_ins >= input$date_r[1],  date_ins <= input$date_r[2])
       }
     )
@@ -93,11 +117,16 @@ dat_fr <- reactive({
       sleeptime_plot(dat = req(dat_fr()), dwm = input$dwm)
     })
 
-    # plot sleep ----
+    # plot get_up ----
     output$getup<- renderPlot({
       getup_plot(dat = req(dat_fr()), dwm = input$dwm)
     })
-    
+
+    # create duration plots dinamically
+    lapply(dur_act, function(x){
+      output[[x]]<- renderPlot({
+        time_plot(dat = req(dat_fr()), measure = x, dwm = input$dwm)
+    })})
 
 }
 
