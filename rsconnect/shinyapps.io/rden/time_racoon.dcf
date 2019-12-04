@@ -5,6 +5,6 @@ account: rden
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1535636
-bundleId: 2624822
+bundleId: 2634816
 url: https://rden.shinyapps.io/time_racoon/
-when: 1574964646.5497
+when: 1575349875.82563

@@ -6,10 +6,12 @@ library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(ggthemes)
+library(ggwordcloud)
 library(readxl)
 library(tidyr)
 library(data.table)
 library(tidyverse)
+library(tidytext)
 library(lubridate)
 library(janitor)
 library(scales)
@@ -35,16 +37,18 @@ ui <- dashboardPage(
         ),
         
         sidebarMenu(
-            menuItem("plots", tabName = "plots", icon = icon("chart-bar"), startExpanded = FALSE,
+            menuItem("plots", tabName = "plots", icon = icon("chart-bar"), startExpanded = TRUE,
+                     menuSubItem("Compare Activities", tabName = "compare_all"),
                      menuSubItem("Time Sleeping", tabName = "time_sleeping"),
                      menuSubItem("Get-up and Bed Time", tabName = "get_up"),
                      menuSubItem("Time in Workplace", tabName = "work_time"),
                      menuSubItem("Time Commuting", tabName = "commuting_time"),
-                     menuSubItem("Time Working at Home", tabName = "home_time"),
+                     menuSubItem("Time at Home", tabName = "home_time"),
                      menuSubItem("Processing Time", tabName = "processing_time"),
-                     menuSubItem("Time doing Tai Chi", tabName = "tai_chi"),
+                     menuSubItem("Time doing Tai-Chi", tabName = "tai_chi"),
                      menuSubItem("Time Walking", tabName = "walking"),
-                     menuSubItem("Time Swimming", tabName = "swimming")
+                     menuSubItem("Time Swimming", tabName = "swimming"),
+                     menuSubItem("People Contacted", tabName = "contacted")
                      ),
             menuItem("tables", tabName = "tables", icon = icon("table"))
         )
@@ -54,6 +58,9 @@ ui <- dashboardPage(
             # plots ------------
             tabItem("tables",
                     HTML("<spam style=color:red;>I am working on this too</spam>")
+            ),
+            tabItem("compare_all", 
+                    plotOutput("c_all")
             ),
             tabItem("time_sleeping", 
                       plotOutput("sleep")
@@ -81,6 +88,10 @@ ui <- dashboardPage(
             ),
             tabItem("swimming",
                      plotOutput("swimming")
+                    ),
+            tabItem("contacted",
+                      plotOutput("contacted")
+                    
             )
         )
     )
@@ -111,22 +122,34 @@ dat_fr <- reactive({
           filter(req(dat_rc()), date_ins >= input$date_r[1],  date_ins <= input$date_r[2])
       }
     )
+
+
+    # compare all ---
+    output$c_all <- renderPlot({
+      compare_plot(dat = req(dat_fr()), dwm = input$dwm)
+    })
     
     # plot sleep ----
-    output$sleep<- renderPlot({
+    output$sleep <- renderPlot({
       sleeptime_plot(dat = req(dat_fr()), dwm = input$dwm)
     })
 
     # plot get_up ----
-    output$getup<- renderPlot({
+    output$getup <- renderPlot({
       getup_plot(dat = req(dat_fr()), dwm = input$dwm)
     })
 
-    # create duration plots dinamically
+    # create all duration plots  ---
     lapply(dur_act, function(x){
       output[[x]]<- renderPlot({
         time_plot(dat = req(dat_fr()), measure = x, dwm = input$dwm)
     })})
+    
+    # people contacted -----
+    output$contacted <- renderPlot({
+      people_plot(dat = req(dat_fr()))
+    })
+
 
 }
 
